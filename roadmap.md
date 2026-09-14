@@ -44,3 +44,11 @@
 - [x] Connexion par téléphone ou e-mail, suppression du champ « Nom d'utilisateur »
 - [ ] Panier vidé après paiement + correction du panier vide au checkout (cache)
 - [ ] Purge automatique du cache navigateur toutes les 30 secondes en production
+
+## 2026-09-14
+- [x] Page dédiée de connexion par téléphone (/connexion-telephone) + mot de passe oublié par SMS
+- [x] Retour KkiaPay vers /paiement/retour puis espace client (plus de page tierce)
+- [x] Reçu PDF + e-mail + SMS déclenchés automatiquement après validation du paiement
+- [x] Rôle « Administrateur » supprimé : comptes migrés vers Modérateur
+- [x] Modérateur = gestion complète sauf comptes, rôles, retraits et réglages (super admin seul)
+- [x] Espaces livreur (/delivery) et comptable (/comptabilite) désormais accessibles
