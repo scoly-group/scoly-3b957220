@@ -105,7 +105,7 @@ serve(async (req) => {
       .from('user_roles')
       .select('*')
       .eq('user_id', userId)
-      .eq('role', 'admin')
+      .eq('role', 'super_admin')
       .single();
 
     if (!existingRole) {
@@ -113,7 +113,7 @@ serve(async (req) => {
         .from('user_roles')
         .upsert({
           user_id: userId,
-          role: 'admin',
+          role: 'super_admin',
         }, {
           onConflict: 'user_id,role',
         });

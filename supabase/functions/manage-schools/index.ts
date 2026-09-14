@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
     const { data: roleRows, error: roleError } = await admin.from("user_roles").select("role").eq("user_id", caller.id);
     if (roleError) return json({ error: "Vérification des droits impossible" }, 500);
     const roles = new Set((roleRows ?? []).map((row) => String(row.role)));
-    const isStaff = roles.has("admin") || roles.has("super_admin") || roles.has("moderator");
+    const isStaff = roles.has("super_admin") || roles.has("moderator");
     const isCommercial = roles.has("commercial");
     if (!isStaff && !isCommercial && !roles.has("referent")) return json({ error: "Droits insuffisants" }, 403);
 
