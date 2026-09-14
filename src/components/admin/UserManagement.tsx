@@ -685,6 +685,7 @@ const UserManagement = () => {
                   </td>
                   <td className="py-3 px-4">{user.last_name || "-"}</td>
                   <td className="py-3 px-4 text-muted-foreground">{user.phone || "-"}</td>
+                  <td className="py-3 px-4 text-muted-foreground">{user.email || "-"}</td>
                   <td className="py-3 px-4">
                     <div className="flex flex-wrap gap-1">
                       {user.roles.map(role => getRoleBadge(role))}
