@@ -223,7 +223,7 @@ const UserManagement = () => {
     // Fetch profiles with their roles
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, first_name, last_name, phone, created_at")
+      .select("id, first_name, last_name, phone, email, created_at")
       .order("created_at", { ascending: false });
 
     if (profilesError) {
@@ -246,7 +246,7 @@ const UserManagement = () => {
       const userRoles = roles?.filter(r => r.user_id === profile.id).map(r => r.role as AppRole) || [];
       return {
         id: profile.id,
-        email: '', // We'll need to get this from auth if needed
+        email: (profile as { email?: string | null }).email || '',
         first_name: profile.first_name,
         last_name: profile.last_name,
         phone: profile.phone,
