@@ -80,7 +80,7 @@ export const openKkiapayPayment = async (options: KkiapayPaymentOptions) => {
     name: options.fullname ?? "",
     countries: ["CI"],
     // Après le paiement, le client revient toujours sur son espace Scoly.
-    callback: `${window.location.origin}/client`,
+    callback: `${window.location.origin}/paiement/retour?orderId=${encodeURIComponent(options.orderId)}`,
     data: JSON.stringify({ order_id: options.orderId }),
   });
 };
