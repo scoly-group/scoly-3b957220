@@ -719,7 +719,7 @@ const UserManagement = () => {
               ))}
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-12 text-center text-muted-foreground">
                     {t.noUsers}
                   </td>
                 </tr>
