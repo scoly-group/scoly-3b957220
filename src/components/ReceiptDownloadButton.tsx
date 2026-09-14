@@ -104,18 +104,34 @@ const ReceiptDownloadButton = ({
   };
 
   return (
-    <Button
-      type="button"
-      variant={variant}
-      size={iconOnly ? "icon" : size}
-      onClick={download}
-      disabled={loading}
-      aria-label="Télécharger le reçu PDF"
-      title="Télécharger le reçu PDF"
-    >
-      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-      {!iconOnly && "Reçu PDF"}
-    </Button>
+    <div className="inline-flex items-center gap-2">
+      <Button
+        type="button"
+        variant={variant}
+        size={iconOnly ? "icon" : size}
+        onClick={download}
+        disabled={loading}
+        aria-label="Télécharger le reçu PDF"
+        title="Télécharger le reçu PDF"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+        {!iconOnly && "Reçu PDF"}
+      </Button>
+      {withEmail && (
+        <Button
+          type="button"
+          variant={variant}
+          size={iconOnly ? "icon" : size}
+          onClick={sendByEmail}
+          disabled={sending}
+          aria-label="Envoyer le reçu par e-mail"
+          title="Envoyer le reçu par e-mail"
+        >
+          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+          {!iconOnly && "Envoyer"}
+        </Button>
+      )}
+    </div>
   );
 };
 
