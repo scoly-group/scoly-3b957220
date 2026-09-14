@@ -185,8 +185,8 @@ function buildPdf(order: any, items: any[], customer: { name: string; phone: str
   doc.rect(M, y, w - 2 * M, 10, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(9);
-  const colQty = M + 92;
-  const colUnit = M + 126;
+  const colQty = M + 82;
+  const colUnit = M + 114;
   doc.text('Produit', M + 4, y + 6.5);
   doc.text('Qté', colQty + 14, y + 6.5, { align: 'right' });
   doc.text('Prix unitaire', colUnit + 30, y + 6.5, { align: 'right' });
@@ -202,7 +202,7 @@ function buildPdf(order: any, items: any[], customer: { name: string; phone: str
       y = 20;
     }
     const name = it.product_name || it.products?.name_fr || 'Produit';
-    const nameLines = doc.splitTextToSize(String(name), 84);
+    const nameLines = doc.splitTextToSize(String(name), 74);
     const rowH = Math.max(11, 6 + nameLines.length * 5);
     doc.setDrawColor(...LINE);
     doc.rect(M, y, w - 2 * M, rowH);
