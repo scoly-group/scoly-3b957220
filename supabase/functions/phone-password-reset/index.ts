@@ -36,12 +36,17 @@ type Admin = ReturnType<typeof createClient>;
 async function findUser(admin: Admin, phone: string) {
   const variants = phoneVariants(phone);
   if (!variants.length) return null;
+  const wanted = new Set(variants.map((v) => v.replace(/\D/g, '').replace(/^225/, '').replace(/^0+/, '')));
+  // Les numéros peuvent être stockés avec des espaces : comparaison sur les chiffres seuls.
   const { data } = await admin
     .from('profiles')
     .select('id, phone')
-    .in('phone', variants)
-    .limit(1);
-  const row = data?.[0];
+    .not('phone', 'is', null)
+    .limit(5000);
+  const row = (data ?? []).find((r) => {
+    const d = String(r.phone || '').replace(/\D/g, '').replace(/^225/, '').replace(/^0+/, '');
+    return d && wanted.has(d);
+  });
   return row ? { id: row.id as string, phone: (row.phone as string) ?? phone } : null;
 }
 
