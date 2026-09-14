@@ -14,7 +14,7 @@ import PageLoader from "@/components/PageLoader";
 import { SessionSecurityProvider } from "@/components/SessionSecurityProvider";
 import RoleGuard from "@/components/RoleGuard";
 import { useAuth } from "@/contexts/AuthContext";
-import { MANAGER_ROLES, isManager, REFERENT_ROLES, TEAM_ROLES, getDashboardPathForRoles, hasPrivilegedRole, isPlatformAdmin, isTeamMember } from "@/lib/rbac";
+import { MANAGER_ROLES, isManager, REFERENT_ROLES, TEAM_ROLES, getDashboardPathForRoles, hasPrivilegedRole, isTeamMember } from "@/lib/rbac";
 
 // Critical path - eager load
 import Index from "./pages/Index";

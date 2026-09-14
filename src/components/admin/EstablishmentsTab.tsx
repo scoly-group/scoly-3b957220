@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { isPlatformAdmin, isModerator } from "@/lib/rbac";
+import { isManager, isModerator } from "@/lib/rbac";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -105,7 +105,7 @@ const emptyForm = {
 const EstablishmentsTab = () => {
   const { user, roles } = useAuth();
   const qc = useQueryClient();
-  const canValidate = isPlatformAdmin(roles) || isModerator(roles);
+  const canValidate = isManager(roles) || isModerator(roles);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
