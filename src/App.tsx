@@ -14,7 +14,7 @@ import PageLoader from "@/components/PageLoader";
 import { SessionSecurityProvider } from "@/components/SessionSecurityProvider";
 import RoleGuard from "@/components/RoleGuard";
 import { useAuth } from "@/contexts/AuthContext";
-import { ADMIN_ROLES, REFERENT_ROLES, TEAM_ROLES, getDashboardPathForRoles, hasPrivilegedRole, isPlatformAdmin, isTeamMember } from "@/lib/rbac";
+import { MANAGER_ROLES, REFERENT_ROLES, TEAM_ROLES, getDashboardPathForRoles, hasPrivilegedRole, isPlatformAdmin, isTeamMember } from "@/lib/rbac";
 
 // Critical path - eager load
 import Index from "./pages/Index";
@@ -141,10 +141,10 @@ const App = () => (
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/account" element={<Navigate to="/client" replace />} />
                       <Route path="/compte" element={<Navigate to="/client" replace />} />
-                      <Route path="/admin" element={<RoleGuard allow={[...ADMIN_ROLES]} loginRedirect="/team"><Admin /></RoleGuard>} />
+                      <Route path="/admin" element={<RoleGuard allow={[...MANAGER_ROLES]} loginRedirect="/team"><Admin /></RoleGuard>} />
                       <Route path="/actualites" element={<Actualites />} />
-                      <Route path="/actualites/write" element={<RoleGuard allow={["super_admin","admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
-                      <Route path="/actualites/edit/:id" element={<RoleGuard allow={["super_admin","admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
+                      <Route path="/actualites/write" element={<RoleGuard allow={["super_admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
+                      <Route path="/actualites/edit/:id" element={<RoleGuard allow={["super_admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
                       <Route path="/actualites/:id" element={<ArticleDetail />} />
                       <Route path="/team" element={<TeamAccess />} />
                       

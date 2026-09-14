@@ -46,10 +46,10 @@ interface AuditRow {
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: "Super administrateur",
-  admin: "Administrateur",
   moderator: "Modérateur",
   commercial: "Commercial",
   comptable: "Comptable",
+  delivery: "Livreur",
   referent: "Gérant ET",
   user: "Client",
 };
