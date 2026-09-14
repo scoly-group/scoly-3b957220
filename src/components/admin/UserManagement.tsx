@@ -54,6 +54,7 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<UserWithRoles | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [securityUser, setSecurityUser] = useState<UserWithRoles | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
