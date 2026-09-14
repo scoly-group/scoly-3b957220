@@ -699,6 +699,15 @@ const UserManagement = () => {
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
                         <Edit size={16} />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="E-mail et mot de passe"
+                        aria-label="E-mail et mot de passe"
+                        onClick={() => setSecurityUser(user)}
+                      >
+                        <KeyRound size={16} />
+                      </Button>
                       {user.id !== SUPER_ADMIN_ID && (
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)}>
                           <Trash2 size={16} className="text-destructive" />
