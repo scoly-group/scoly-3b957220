@@ -48,12 +48,19 @@ Deno.serve(async (req) => {
     if (!email) {
       const variants = phoneVariants(raw);
       if (variants.length) {
-        const { data: byPhone } = await admin
+        const wanted = new Set(variants.map((v) => v.replace(/\D/g, '').replace(/^225/, '').replace(/^0+/, '')));
+        // Les numéros peuvent être stockés avec des espaces : comparaison sur les chiffres seuls.
+        const { data: rows } = await admin
           .from('profiles')
           .select('email, phone')
-          .in('phone', variants)
-          .limit(1);
-        email = byPhone?.[0]?.email ?? null;
+          .not('phone', 'is', null)
+          .limit(5000);
+        const hit = (rows ?? []).find((r) => {
+          const d = String(r.phone || '').replace(/\D/g, '').replace(/^225/, '').replace(/^0+/, '');
+          return d && wanted.has(d);
+        });
+        email = (hit?.email as string | undefined) ?? null;
+
 
         // Repli : l'e-mail peut n'exister que côté authentification.
         if (!email) {
