@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { data: roles } = await supabase
       .from("user_roles").select("role").eq("user_id", user.id);
-    const isStaff = roles?.some((r: any) => r.role === "admin" || r.role === "moderator");
+    const isStaff = roles?.some((r: any) => r.role === "super_admin" || r.role === "moderator");
     if (!isStaff) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
