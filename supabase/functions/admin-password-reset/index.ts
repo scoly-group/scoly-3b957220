@@ -67,16 +67,17 @@ Deno.serve(async (req) => {
       });
       if (insertErr) throw insertErr;
 
+      // send-sms attend le texte dans `body` et un jeton d'administrateur valide.
       const smsRes = await fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${SERVICE_KEY}`,
-          apikey: SERVICE_KEY,
+          Authorization: authHeader,
+          apikey: ANON_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           to: phone,
-          message: `Scoly : votre code de reinitialisation est ${code}. Valable 10 minutes.`,
+          body: `Scoly : votre code de reinitialisation est ${code}. Valable 10 minutes.`,
         }),
       });
       const smsBody = await smsRes.text();
@@ -131,13 +132,13 @@ Deno.serve(async (req) => {
         await fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${SERVICE_KEY}`,
-            apikey: SERVICE_KEY,
+            Authorization: authHeader,
+            apikey: ANON_KEY,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             to: row.phone,
-            message: 'Scoly : votre mot de passe a bien ete modifie.',
+            body: 'Scoly : votre mot de passe a bien ete modifie.',
           }),
         }).catch(() => null);
       }

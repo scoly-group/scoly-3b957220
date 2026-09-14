@@ -13,8 +13,10 @@ import {
   Phone,
   Eye,
   EyeOff,
-  Truck
+  Truck,
+  KeyRound
 } from "lucide-react";
+import UserSecurityDialog from "@/components/admin/UserSecurityDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +54,7 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<UserWithRoles | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [securityUser, setSecurityUser] = useState<UserWithRoles | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -223,7 +226,7 @@ const UserManagement = () => {
     // Fetch profiles with their roles
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, first_name, last_name, phone, created_at")
+      .select("id, first_name, last_name, phone, email, created_at")
       .order("created_at", { ascending: false });
 
     if (profilesError) {
@@ -246,7 +249,7 @@ const UserManagement = () => {
       const userRoles = roles?.filter(r => r.user_id === profile.id).map(r => r.role as AppRole) || [];
       return {
         id: profile.id,
-        email: '', // We'll need to get this from auth if needed
+        email: (profile as { email?: string | null }).email || '',
         first_name: profile.first_name,
         last_name: profile.last_name,
         phone: profile.phone,
@@ -451,6 +454,7 @@ const UserManagement = () => {
   const filteredUsers = users.filter(u =>
     (u.first_name?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (u.last_name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (u.email?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (u.phone?.toLowerCase() || '').includes(search.toLowerCase())
   );
 
@@ -664,6 +668,7 @@ const UserManagement = () => {
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.firstName}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.lastName}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.phone}</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.email}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.roles}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.date}</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">{t.actions}</th>
@@ -680,6 +685,7 @@ const UserManagement = () => {
                   </td>
                   <td className="py-3 px-4">{user.last_name || "-"}</td>
                   <td className="py-3 px-4 text-muted-foreground">{user.phone || "-"}</td>
+                  <td className="py-3 px-4 text-muted-foreground">{user.email || "-"}</td>
                   <td className="py-3 px-4">
                     <div className="flex flex-wrap gap-1">
                       {user.roles.map(role => getRoleBadge(role))}
@@ -693,6 +699,15 @@ const UserManagement = () => {
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
                         <Edit size={16} />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="E-mail et mot de passe"
+                        aria-label="E-mail et mot de passe"
+                        onClick={() => setSecurityUser(user)}
+                      >
+                        <KeyRound size={16} />
+                      </Button>
                       {user.id !== SUPER_ADMIN_ID && (
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)}>
                           <Trash2 size={16} className="text-destructive" />
@@ -704,7 +719,7 @@ const UserManagement = () => {
               ))}
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-12 text-center text-muted-foreground">
                     {t.noUsers}
                   </td>
                 </tr>
@@ -713,6 +728,22 @@ const UserManagement = () => {
           </table>
         </div>
       </div>
+
+      <UserSecurityDialog
+        open={!!securityUser}
+        onOpenChange={(open) => !open && setSecurityUser(null)}
+        user={
+          securityUser
+            ? {
+                id: securityUser.id,
+                email: securityUser.email,
+                phone: securityUser.phone,
+                name: [securityUser.first_name, securityUser.last_name].filter(Boolean).join(" ") || "Compte",
+              }
+            : null
+        }
+        onUpdated={fetchUsers}
+      />
     </div>
   );
 };

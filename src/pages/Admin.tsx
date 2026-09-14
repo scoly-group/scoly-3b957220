@@ -863,7 +863,7 @@ const OrdersTab = () => {
                                 <p className="text-xs text-muted-foreground basis-full">
                                   La livraison est clôturée après la remise du commercial et la confirmation du client.
                                 </p>
-                                <ReceiptDownloadButton orderId={order.id} />
+                                <ReceiptDownloadButton orderId={order.id} withEmail />
                               </div>
                             </div>
                           </div>

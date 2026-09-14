@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,8 @@ interface ReceiptDownloadButtonProps {
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "icon";
   iconOnly?: boolean;
+  /** Affiche aussi un bouton « Envoyer par e-mail » (espaces internes). */
+  withEmail?: boolean;
 }
 
 const ReceiptDownloadButton = ({
@@ -16,9 +18,34 @@ const ReceiptDownloadButton = ({
   variant = "outline",
   size = "sm",
   iconOnly = false,
+  withEmail = false,
 }: ReceiptDownloadButtonProps) => {
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const { toast } = useToast();
+
+  const sendByEmail = async () => {
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-receipt-pdf", {
+        body: { order_id: orderId, email: true },
+      });
+      const failure = error?.message || (data as { error?: string } | null)?.error;
+      if (failure) throw new Error(failure);
+      toast({
+        title: "Reçu envoyé",
+        description: `Le reçu a été envoyé à ${(data as { recipient?: string })?.recipient ?? "l'adresse du client"}.`,
+      });
+    } catch (e) {
+      toast({
+        title: "Envoi impossible",
+        description: e instanceof Error ? e.message : "Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
 
   const download = async () => {
     setLoading(true);
@@ -77,18 +104,34 @@ const ReceiptDownloadButton = ({
   };
 
   return (
-    <Button
-      type="button"
-      variant={variant}
-      size={iconOnly ? "icon" : size}
-      onClick={download}
-      disabled={loading}
-      aria-label="Télécharger le reçu PDF"
-      title="Télécharger le reçu PDF"
-    >
-      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-      {!iconOnly && "Reçu PDF"}
-    </Button>
+    <div className="inline-flex items-center gap-2">
+      <Button
+        type="button"
+        variant={variant}
+        size={iconOnly ? "icon" : size}
+        onClick={download}
+        disabled={loading}
+        aria-label="Télécharger le reçu PDF"
+        title="Télécharger le reçu PDF"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+        {!iconOnly && "Reçu PDF"}
+      </Button>
+      {withEmail && (
+        <Button
+          type="button"
+          variant={variant}
+          size={iconOnly ? "icon" : size}
+          onClick={sendByEmail}
+          disabled={sending}
+          aria-label="Envoyer le reçu par e-mail"
+          title="Envoyer le reçu par e-mail"
+        >
+          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+          {!iconOnly && "Envoyer"}
+        </Button>
+      )}
+    </div>
   );
 };
 

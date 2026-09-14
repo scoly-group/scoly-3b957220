@@ -199,7 +199,7 @@ const PaymentsTab = () => {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         {payment.order_id && (
-                          <ReceiptDownloadButton orderId={payment.order_id} variant="ghost" iconOnly />
+                          <ReceiptDownloadButton orderId={payment.order_id} variant="ghost" iconOnly withEmail />
                         )}
                         <Dialog>
                           <DialogTrigger asChild>

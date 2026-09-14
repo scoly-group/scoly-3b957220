@@ -233,36 +233,33 @@ const Auth = () => {
           return;
         }
 
-        // Les clients peuvent se connecter par téléphone, email ou nom d'utilisateur.
-        let loginEmail = identifier;
-        const normalizedPhone = identifier.replace(/[\s.-]/g, "");
-        const isPhone = isClientPortal && /^\+[1-9]\d{6,14}$/.test(normalizedPhone);
-        
-        // If not an email, try to find the user by username in profiles
-        if (!identifier.includes('@') && !isPhone) {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('id, email')
-            .eq('username', identifier)
-            .maybeSingle();
-          
-          if (profile?.email) {
-            loginEmail = profile.email;
-          } else if (profile?.id) {
-            // User has username but no email stored - can't login by username yet
-            setErrors({ identifier: "Connectez-vous avec votre email. Le nom d'utilisateur sera disponible après votre première connexion." });
-            setLoading(false);
-            return;
-          } else {
-            setErrors({ identifier: "Utilisateur non trouvé" });
+        // Connexion par e-mail directe ; par numéro de téléphone via le serveur.
+        let error: { message: string } | null = null;
+
+        if (identifier.includes('@')) {
+          ({ error } = await signIn(identifier, password));
+        } else {
+          const { data, error: fnError } = await supabase.functions.invoke('phone-login', {
+            body: { identifier: identifier.trim(), password },
+          });
+          const failure = (data as { error?: string } | null)?.error;
+          if (fnError || failure || !(data as { access_token?: string })?.access_token) {
+            setErrors({
+              identifier:
+                failure ||
+                "Numéro ou mot de passe incorrect. Vérifiez votre numéro (ex. 07 00 00 00 00).",
+            });
             setLoading(false);
             return;
           }
+          const tokens = data as { access_token: string; refresh_token: string };
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+          });
+          error = sessionError;
         }
 
-         const { error } = isPhone
-           ? await supabase.auth.signInWithPassword({ phone: normalizedPhone, password })
-           : await signIn(loginEmail, password);
          if (!error) {
            // Update profile with email on successful login
            const { data: { user: loggedUser } } = await supabase.auth.getUser();
