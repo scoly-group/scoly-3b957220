@@ -30,8 +30,10 @@ const COMPANY = {
   site: 'scoly.ci',
 };
 
+/** Séparateur de milliers en espace simple : les polices PDF ne rendent pas l'espace fine. */
 function fmt(n: number) {
-  return new Intl.NumberFormat('fr-FR').format(Math.round(n)) + ' FCFA';
+  const value = String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return `${n < 0 ? '-' : ''}${value} FCFA`;
 }
 
 /** Affichage du téléphone sans jamais retirer le zéro national. */
