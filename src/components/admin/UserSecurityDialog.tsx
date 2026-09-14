@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyRound, Loader2, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,13 @@ const UserSecurityDialog = ({ open, onOpenChange, user, onUpdated }: UserSecurit
   const [newPassword, setNewPassword] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [codeSent, setCodeSent] = useState(false);
+
+  useEffect(() => {
+    setEmail(user?.email || "");
+    setCode("");
+    setNewPassword("");
+    setCodeSent(false);
+  }, [user?.id, user?.email]);
 
   const call = async (payload: Record<string, unknown>, tag: string) => {
     setBusy(tag);
@@ -78,15 +85,7 @@ const UserSecurityDialog = ({ open, onOpenChange, user, onUpdated }: UserSecurit
   return (
     <Dialog
       open={open}
-      onOpenChange={(next) => {
-        if (next && user) setEmail(user.email || "");
-        if (!next) {
-          setCode("");
-          setNewPassword("");
-          setCodeSent(false);
-        }
-        onOpenChange(next);
-      }}
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="max-w-md">
         <DialogHeader>
