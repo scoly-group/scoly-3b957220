@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     }
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const { data: roles } = await supabase
-      .from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin");
+      .from("user_roles").select("role").eq("user_id", user.id).in("role", ["super_admin", "moderator"]);
     if (!roles || roles.length === 0) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },

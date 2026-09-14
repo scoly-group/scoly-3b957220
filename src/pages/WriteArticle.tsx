@@ -119,7 +119,7 @@ const WriteArticle = () => {
         const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
         if (data && data.length > 0) {
           const roles = data.map((r: any) => r.role);
-          if (roles.includes("admin")) setUserRole("admin");
+          if (roles.includes("super_admin")) setUserRole("admin");
           else if (roles.includes("moderator")) setUserRole("moderator");
           else setUserRole("user");
         }

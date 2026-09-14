@@ -42,7 +42,7 @@ serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", caller.id)
-      .in("role", ["super_admin", "admin"]);
+      .in("role", ["super_admin", "moderator"]);
     if (!callerRoles || callerRoles.length === 0) {
       return json({ error: "Accès réservé à l'administration" }, 403);
     }

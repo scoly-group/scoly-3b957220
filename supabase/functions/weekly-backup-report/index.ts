@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
         .from("user_roles")
         .select("role")
         .eq("user_id", userData.user.id)
-        .eq("role", "admin")
+        .eq("role", "super_admin")
         .maybeSingle();
       if (!roleCheck) return json({ error: "Admin only" }, 403);
     }

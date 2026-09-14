@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { toast } from "sonner";
 import { DollarSign, Plus, Pencil, Trash2, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { isPlatformAdmin, isSuperAdmin } from "@/lib/rbac";
+import { isManager, isSuperAdmin } from "@/lib/rbac";
 import AccessDenied from "@/components/AccessDenied";
 
 type Commission = {
@@ -47,7 +47,7 @@ const fcfa = (v: number) => new Intl.NumberFormat("fr-FR").format(Math.round(v |
 
 const CommissionsManagement = () => {
   const { roles } = useAuth();
-  const canWrite = isPlatformAdmin(roles);
+  const canWrite = isManager(roles);
   const canDelete = isSuperAdmin(roles);
 
   const [rows, setRows] = useState<Commission[]>([]);
@@ -155,7 +155,7 @@ const CommissionsManagement = () => {
     load();
   };
 
-  if (!isPlatformAdmin(roles)) return <AccessDenied />;
+  if (!isManager(roles)) return <AccessDenied />;
 
   return (
     <div className="space-y-6">

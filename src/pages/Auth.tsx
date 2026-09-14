@@ -12,7 +12,7 @@ import MathCaptcha from "@/components/MathCaptcha";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useRateLimit } from "@/hooks/useRateLimit";
-import { getDashboardPathForRoles, isPlatformAdmin, isReferent, isTeamMember } from "@/lib/rbac";
+import { getDashboardPathForRoles, isManager, isReferent, isTeamMember } from "@/lib/rbac";
 import PhoneInput from "@/components/common/PhoneInput";
 
 
@@ -55,7 +55,7 @@ const Auth = () => {
       .eq('user_id', u.id);
 
     const roleList = (roles || []).map((r) => r.role);
-    const isAdmin = isPlatformAdmin(roleList);
+    const isAdmin = isManager(roleList);
     const isTeam = isTeamMember(roleList);
     const isPartner = isReferent(roleList);
 

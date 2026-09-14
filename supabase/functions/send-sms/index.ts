@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       userId = claimsData.claims.sub as string;
       const { data: roleRows } = await sbAdmin.from('user_roles').select('role').eq('user_id', userId);
       const roleList = (roleRows || []).map((r: any) => r.role);
-      const allowed = ['admin', 'super_admin', 'moderator'].some((r) => roleList.includes(r));
+      const allowed = ['super_admin', 'moderator'].some((r) => roleList.includes(r));
       if (!allowed) return json({ error: 'Forbidden' }, 403);
     }
 

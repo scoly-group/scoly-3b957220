@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", userData.user.id)
-      .in("role", ["admin", "moderator", "vendor"]);
+      .in("role", ["super_admin", "moderator", "vendor"]);
     if (!roleRows || roleRows.length === 0) {
       return new Response(JSON.stringify({ error: "Forbidden: staff role required" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },

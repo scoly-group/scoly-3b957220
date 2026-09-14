@@ -67,7 +67,7 @@ serve(async (req) => {
       .from('user_roles')
       .select('role')
       .eq('user_id', callerUser.id)
-      .in('role', ['super_admin', 'admin']);
+      .in('role', ['super_admin']);
 
     if (!callerRoles || callerRoles.length === 0) {
       return new Response(JSON.stringify({ error: 'Accès admin requis' }), {
@@ -136,7 +136,7 @@ serve(async (req) => {
     }
 
     // Assign roles
-    const VALID_ROLES = ['super_admin','admin','moderator','commercial','comptable','referent','user','vendor','delivery'];
+    const VALID_ROLES = ['super_admin','moderator','commercial','comptable','referent','user','vendor','delivery'];
     const rolesToAssign = roles && roles.length > 0 ? roles : ['user'];
     for (const role of rolesToAssign) {
       if (VALID_ROLES.includes(role)) {

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { getDashboardPathForRoles, isPlatformAdmin } from '@/lib/rbac';
+import { getDashboardPathForRoles, isManager } from '@/lib/rbac';
 
 interface AuthContextType {
   user: User | null;
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return nextRoles;
       });
       setIsAdmin((prev) => {
-        const next = isPlatformAdmin(nextRoles);
+        const next = isManager(nextRoles);
         return prev === next ? prev : next;
       });
     } finally {

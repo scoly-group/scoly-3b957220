@@ -14,7 +14,7 @@ import PageLoader from "@/components/PageLoader";
 import { SessionSecurityProvider } from "@/components/SessionSecurityProvider";
 import RoleGuard from "@/components/RoleGuard";
 import { useAuth } from "@/contexts/AuthContext";
-import { ADMIN_ROLES, REFERENT_ROLES, TEAM_ROLES, getDashboardPathForRoles, hasPrivilegedRole, isPlatformAdmin, isTeamMember } from "@/lib/rbac";
+import { MANAGER_ROLES, isManager, REFERENT_ROLES, TEAM_ROLES, getDashboardPathForRoles, hasPrivilegedRole, isTeamMember } from "@/lib/rbac";
 
 // Critical path - eager load
 import Index from "./pages/Index";
@@ -50,6 +50,8 @@ const KitDetail = lazy(() => import("./pages/KitDetail"));
 const EstablishmentSpace = lazy(() => import("./pages/EstablishmentSpace"));
 const DeliveryReturns = lazy(() => import("./pages/DeliveryReturns"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const DeliveryDashboard = lazy(() => import("./pages/DeliveryDashboard"));
+const Comptabilite = lazy(() => import("./pages/Comptabilite"));
 const PhoneLogin = lazy(() => import("./pages/PhoneLogin"));
 const PaymentReturn = lazy(() => import("./pages/PaymentReturn"));
 
@@ -69,7 +71,7 @@ const TeamAccess = () => {
   const { user, loading, rolesLoading, roles } = useAuth();
   if (loading || (user && rolesLoading)) return <PageLoader />;
   if (!user) return <Auth />;
-  if (isPlatformAdmin(roles)) {
+  if (isManager(roles)) {
     return <Navigate to="/admin" replace />;
   }
   return isTeamMember(roles)
@@ -141,10 +143,10 @@ const App = () => (
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/account" element={<Navigate to="/client" replace />} />
                       <Route path="/compte" element={<Navigate to="/client" replace />} />
-                      <Route path="/admin" element={<RoleGuard allow={[...ADMIN_ROLES]} loginRedirect="/team"><Admin /></RoleGuard>} />
+                      <Route path="/admin" element={<RoleGuard allow={[...MANAGER_ROLES]} loginRedirect="/team"><Admin /></RoleGuard>} />
                       <Route path="/actualites" element={<Actualites />} />
-                      <Route path="/actualites/write" element={<RoleGuard allow={["super_admin","admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
-                      <Route path="/actualites/edit/:id" element={<RoleGuard allow={["super_admin","admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
+                      <Route path="/actualites/write" element={<RoleGuard allow={["super_admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
+                      <Route path="/actualites/edit/:id" element={<RoleGuard allow={["super_admin","moderator","user"]}><WriteArticle /></RoleGuard>} />
                       <Route path="/actualites/:id" element={<ArticleDetail />} />
                       <Route path="/team" element={<TeamAccess />} />
                       
@@ -169,6 +171,9 @@ const App = () => (
                       <Route path="/livraison-retours" element={<DeliveryReturns />} />
                       <Route path="/livraison" element={<DeliveryReturns />} />
                       <Route path="/unsubscribe" element={<Unsubscribe />} />
+                      <Route path="/delivery" element={<RoleGuard allow={["delivery","super_admin","moderator"]}><DeliveryDashboard /></RoleGuard>} />
+                      <Route path="/livreur" element={<Navigate to="/delivery" replace />} />
+                      <Route path="/comptabilite" element={<RoleGuard allow={["comptable","super_admin"]}><Comptabilite /></RoleGuard>} />
                       <Route path="/connexion-telephone" element={<PhoneLogin />} />
                       <Route path="/phone-login" element={<Navigate to="/connexion-telephone" replace />} />
                       <Route path="/paiement/retour" element={<PaymentReturn />} />

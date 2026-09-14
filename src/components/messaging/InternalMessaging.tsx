@@ -56,7 +56,7 @@ const InternalMessaging = ({ isModeratorView = false, customerId, onClose }: Int
   const [moderators, setModerators] = useState<Profile[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const isModerator = roles.includes('moderator') || roles.includes('admin');
+  const isModerator = roles.includes('moderator') || roles.includes('super_admin');
 
   const fetchProfiles = useCallback(async (userIds: string[]) => {
     if (userIds.length === 0) return;
@@ -78,7 +78,7 @@ const InternalMessaging = ({ isModeratorView = false, customerId, onClose }: Int
     const { data: modRoles } = await supabase
       .from('user_roles')
       .select('user_id')
-      .in('role', ['moderator', 'admin']);
+      .in('role', ['moderator', 'super_admin']);
     
     if (modRoles && modRoles.length > 0) {
       const modIds = modRoles.map(r => r.user_id);

@@ -311,7 +311,7 @@ Deno.serve(async (req) => {
       const { data: roles } = await sb.from('user_roles').select('role').eq('user_id', userId);
       const roleList = (roles || []).map((r: any) => r.role);
       const isStaff = roleList.some((role: string) =>
-        ['super_admin', 'admin', 'moderator', 'commercial', 'comptable', 'delivery'].includes(role)
+        ['super_admin', 'moderator', 'commercial', 'comptable', 'delivery'].includes(role)
       );
       const isOwner = order.user_id === userId;
       const isDelivery = order.delivery_user_id === userId;

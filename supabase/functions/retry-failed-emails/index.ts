@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       });
       const { data: { user } } = await userClient.auth.getUser();
       if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
-      const { data: roleCheck } = await admin.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
+      const { data: roleCheck } = await admin.from('user_roles').select('role').eq('user_id', user.id).in('role', ['super_admin', 'moderator']).maybeSingle();
       if (!roleCheck) return new Response(JSON.stringify({ error: 'Admin only' }), { status: 403, headers: corsHeaders });
     }
 

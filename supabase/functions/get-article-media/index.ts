@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
         .select("role")
         .eq("user_id", userId);
       allowed = (roles ?? []).some((r: { role: string }) =>
-        r.role === "admin" || r.role === "moderator" || r.role === "super_admin"
+        r.role === "moderator" || r.role === "super_admin"
       );
     }
 

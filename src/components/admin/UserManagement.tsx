@@ -31,7 +31,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 
 type AppRole = 'super_admin' | 'admin' | 'moderator' | 'commercial' | 'comptable' | 'referent' | 'user' | 'vendor' | 'delivery';
 
-const ROLE_OPTIONS: AppRole[] = ['super_admin','admin','moderator','commercial','comptable','referent','user'];
+const ROLE_OPTIONS: AppRole[] = ['super_admin','moderator','commercial','comptable','delivery','referent','user'];
 
 interface UserWithRoles {
   id: string;
@@ -87,7 +87,7 @@ const UserManagement = () => {
       userDeleted: "Utilisateur supprimé",
       error: "Une erreur est survenue",
       totalUsers: "Total utilisateurs",
-      admins: "Administrateurs",
+      admins: "Super administrateurs",
       moderators: "Modérateurs",
       vendors: "Vendeurs",
       deliverers: "Livreurs",
@@ -460,7 +460,7 @@ const UserManagement = () => {
 
   const stats = {
     total: users.length,
-    admins: users.filter(u => u.roles.includes('admin')).length,
+    admins: users.filter(u => u.roles.includes('super_admin')).length,
     moderators: users.filter(u => u.roles.includes('moderator')).length,
     vendors: users.filter(u => u.roles.includes('vendor')).length,
     deliverers: users.filter(u => u.roles.includes('delivery')).length
