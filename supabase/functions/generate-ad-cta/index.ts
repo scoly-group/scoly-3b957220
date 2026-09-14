@@ -38,7 +38,7 @@ serve(async (req) => {
     const { data: roleRow } = await adminClient
       .from("user_roles").select("role")
       .eq("user_id", claimsData.claims.sub)
-      .in("role", ["admin", "moderator"]).maybeSingle();
+      .in("role", ["super_admin", "moderator"]).maybeSingle();
     if (!roleRow) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },

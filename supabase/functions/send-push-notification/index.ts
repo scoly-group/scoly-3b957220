@@ -46,7 +46,7 @@ serve(async (req) => {
       .from('user_roles')
       .select('role')
       .eq('user_id', callerId)
-      .in('role', ['admin', 'moderator']);
+      .in('role', ['super_admin', 'moderator']);
 
     if (!roles || roles.length === 0) {
       return new Response(

@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     .select("role")
     .eq("user_id", userData.user.id);
   const roleList = (roles ?? []).map((r: { role: string }) => r.role);
-  if (!roleList.includes("admin") && !roleList.includes("super_admin")) {
+  if (!roleList.includes("moderator") && !roleList.includes("super_admin")) {
     return json({ error: "Forbidden" }, 403);
   }
 

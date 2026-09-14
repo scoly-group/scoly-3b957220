@@ -52,7 +52,7 @@ serve(async (req) => {
       const { data: roles } = await supabase
         .from("user_roles").select("role").eq("user_id", user.id);
       const isStaff = roles?.some((r: any) =>
-        ["admin", "super_admin", "moderator"].includes(r.role)
+        ["super_admin", "moderator"].includes(r.role)
       );
       if (!isStaff) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {

@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
           .select("role")
           .eq("user_id", callerId);
         const list = (roles ?? []).map((r: { role: string }) => r.role);
-        allowed = ["admin", "super_admin", "moderator", "commercial", "delivery"].some((r) =>
+        allowed = ["super_admin", "moderator", "commercial", "delivery"].some((r) =>
           list.includes(r),
         );
       }

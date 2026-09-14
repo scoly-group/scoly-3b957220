@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", caller.user.id)
-      .in("role", ["admin", "super_admin"]);
+      .in("role", ["super_admin"]);
     if (callerRolesError) return json({ error: "Vérification des droits impossible" }, 500);
     if (!callerRoles?.length) return json({ error: "Droits insuffisants" }, 403);
 
