@@ -392,7 +392,7 @@ export const useUserMutations = () => {
   const queryClient = useQueryClient();
 
   const updateUserRole = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: "admin" | "moderator" | "user" | "vendor" }) => {
+    mutationFn: async ({ userId, role }: { userId: string; role: "super_admin" | "moderator" | "user" | "vendor" }) => {
       // Check for protected super admin
       const SUPER_ADMIN_ID = "24cc1ed2-040f-4ad7-8413-a416518fb684";
       if (userId === SUPER_ADMIN_ID) {

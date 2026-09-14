@@ -88,7 +88,7 @@ const ModeratorDashboard = () => {
       .eq('user_id', user.id);
 
     const hasAccess = roles?.some(r => 
-      r.role === 'admin' || r.role === 'moderator'
+      r.role === 'super_admin' || r.role === 'moderator'
     );
 
     if (!hasAccess) {

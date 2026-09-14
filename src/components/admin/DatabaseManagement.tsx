@@ -74,8 +74,8 @@ const ALL_TABLES = [
 
 // Database roles
 const DB_ROLES = [
-  { name: 'admin', description: 'Accès complet à toutes les fonctionnalités', color: 'bg-red-500' },
-  { name: 'moderator', description: 'Modération des contenus et commandes', color: 'bg-blue-500' },
+  { name: 'super_admin', description: 'Accès complet à toutes les fonctionnalités', color: 'bg-red-500' },
+  { name: 'moderator', description: 'Gestion complète sauf comptes, rôles, retraits et réglages', color: 'bg-blue-500' },
   { name: 'vendor', description: 'Gestion des produits et ventes', color: 'bg-purple-500' },
   { name: 'delivery', description: 'Gestion des livraisons', color: 'bg-green-500' },
   { name: 'user', description: 'Utilisateur standard', color: 'bg-gray-500' },

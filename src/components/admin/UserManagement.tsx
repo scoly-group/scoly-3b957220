@@ -460,7 +460,7 @@ const UserManagement = () => {
 
   const stats = {
     total: users.length,
-    admins: users.filter(u => u.roles.includes('admin')).length,
+    admins: users.filter(u => u.roles.includes('super_admin')).length,
     moderators: users.filter(u => u.roles.includes('moderator')).length,
     vendors: users.filter(u => u.roles.includes('vendor')).length,
     deliverers: users.filter(u => u.roles.includes('delivery')).length
