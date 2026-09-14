@@ -454,6 +454,7 @@ const UserManagement = () => {
   const filteredUsers = users.filter(u =>
     (u.first_name?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (u.last_name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (u.email?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (u.phone?.toLowerCase() || '').includes(search.toLowerCase())
   );
 
