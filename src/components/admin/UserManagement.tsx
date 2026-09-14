@@ -728,6 +728,22 @@ const UserManagement = () => {
           </table>
         </div>
       </div>
+
+      <UserSecurityDialog
+        open={!!securityUser}
+        onOpenChange={(open) => !open && setSecurityUser(null)}
+        user={
+          securityUser
+            ? {
+                id: securityUser.id,
+                email: securityUser.email,
+                phone: securityUser.phone,
+                name: [securityUser.first_name, securityUser.last_name].filter(Boolean).join(" ") || "Compte",
+              }
+            : null
+        }
+        onUpdated={fetchUsers}
+      />
     </div>
   );
 };
