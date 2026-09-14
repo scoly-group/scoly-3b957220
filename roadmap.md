@@ -7,7 +7,7 @@
 - [ ] Mettre à jour les pages légales : SCOLY GROUP, Korhogo, suppression de la section hébergement, septembre 2026.
 - [ ] Mettre à jour livraison et retours : vérification avec le livreur, aucun retour après validation conforme.
 - [x] Corriger la suppression des comptes sauf super administrateurs.
-- [ ] Afficher les adresses email dans les pages administrateur concernées.
+- [x] Afficher les adresses email dans les pages administrateur concernées.
 - [x] Rendre le téléphone obligatoire, l’email facultatif, et permettre la connexion par téléphone ou email.
 - [x] Préremplir la commande avec les informations de livraison enregistrées du client.
 - [ ] Récupérer et vérifier les ventes KkiaPay de 3 224 FCFA et 26 000 FCFA, puis les rétablir partout.
@@ -20,8 +20,8 @@
 - [x] Restaurer les 2 ventes KkiaPay (26 000 FCFA INZA, 3 224 FCFA Super Admin) + paiements réussis
 - [x] Rétablir le zéro des numéros ivoiriens (base + envoi SMS/WhatsApp)
 - [x] Historique de paiement client : plus de chargement infini, erreur affichée + bouton Réessayer
-- [ ] Reçus PDF strictement conformes à la maquette fournie (admin, modérateur, client, paiements)
-- [ ] Admin : gestion complète des comptes (emails visibles, modification email, réinitialisation mot de passe)
+- [x] Reçus PDF strictement conformes à la maquette fournie (admin, modérateur, client, paiements)
+- [x] Admin : gestion complète des comptes (emails visibles, modification email, réinitialisation mot de passe)
 - [ ] Client : modification des adresses de livraison (actuellement suppression seulement)
 - [ ] Commandes : boutons d'action verrouillés/verts une fois l'étape effectuée
 - [ ] Livraisons : assignation/réassignation + notifications push ancien/nouveau commercial
@@ -39,8 +39,8 @@
 - [ ] Promotions & Ventes Flash : effet visible sur le site public, CRUD, tout supprimer, remise modifiable
 - [ ] IA : proposition automatique de ventes flash sur les kits les moins vendus
 - [ ] Messages d'erreur techniques remplacés par des messages clairs partout
-- [ ] Reçu PDF conforme à la maquette partout + envoi par e-mail à la validation
-- [ ] Admin : voir/modifier e-mails, définir un mot de passe, code SMS à 6 chiffres valable 10 min
-- [ ] Connexion par téléphone ou e-mail, suppression du champ « Nom d'utilisateur »
+- [x] Reçu PDF conforme à la maquette partout + envoi par e-mail (bouton admin et paiements)
+- [x] Admin : voir/modifier e-mails, définir un mot de passe, code SMS à 6 chiffres valable 10 min
+- [x] Connexion par téléphone ou e-mail, suppression du champ « Nom d'utilisateur »
 - [ ] Panier vidé après paiement + correction du panier vide au checkout (cache)
 - [ ] Purge automatique du cache navigateur toutes les 30 secondes en production
