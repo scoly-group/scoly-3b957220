@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.verify-kkiapay-payment]
 verify_jwt = false
+
+[functions.phone-login]
+verify_jwt = false
+
+[functions.phone-password-reset]
+verify_jwt = false

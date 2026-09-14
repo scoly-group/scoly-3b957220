@@ -82,19 +82,24 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) return json({ error: 'Unauthorized' }, 401);
 
-    const authed = createClient(SUPABASE_URL, ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsErr } = await authed.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims) return json({ error: 'Unauthorized' }, 401);
-
-    const userId = claimsData.claims.sub as string;
     const sbAdmin = createClient(SUPABASE_URL, SERVICE_KEY);
-    const { data: roleRows } = await sbAdmin.from('user_roles').select('role').eq('user_id', userId);
-    const roleList = (roleRows || []).map((r: any) => r.role);
-    const allowed = ['admin', 'super_admin', 'moderator'].some((r) => roleList.includes(r));
-    if (!allowed) return json({ error: 'Forbidden' }, 403);
+
+    // Appel interne (clé de service) : autorisé sans compte utilisateur.
+    let userId: string | null = null;
+    if (token !== SERVICE_KEY) {
+      const authed = createClient(SUPABASE_URL, ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: claimsData, error: claimsErr } = await authed.auth.getClaims(token);
+      if (claimsErr || !claimsData?.claims) return json({ error: 'Unauthorized' }, 401);
+
+      userId = claimsData.claims.sub as string;
+      const { data: roleRows } = await sbAdmin.from('user_roles').select('role').eq('user_id', userId);
+      const roleList = (roleRows || []).map((r: any) => r.role);
+      const allowed = ['admin', 'super_admin', 'moderator'].some((r) => roleList.includes(r));
+      if (!allowed) return json({ error: 'Forbidden' }, 403);
+    }
 
     const payload = await req.json();
     const { template_key, variables = {}, body: rawBody, action } = payload;

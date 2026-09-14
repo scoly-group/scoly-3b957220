@@ -50,6 +50,8 @@ const KitDetail = lazy(() => import("./pages/KitDetail"));
 const EstablishmentSpace = lazy(() => import("./pages/EstablishmentSpace"));
 const DeliveryReturns = lazy(() => import("./pages/DeliveryReturns"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const PhoneLogin = lazy(() => import("./pages/PhoneLogin"));
+const PaymentReturn = lazy(() => import("./pages/PaymentReturn"));
 
 const Forbidden = ({ title = "Accès refusé (403)" }: { title?: string }) => (
   <main className="min-h-screen flex items-center justify-center bg-background p-6">
@@ -167,6 +169,9 @@ const App = () => (
                       <Route path="/livraison-retours" element={<DeliveryReturns />} />
                       <Route path="/livraison" element={<DeliveryReturns />} />
                       <Route path="/unsubscribe" element={<Unsubscribe />} />
+                      <Route path="/connexion-telephone" element={<PhoneLogin />} />
+                      <Route path="/phone-login" element={<Navigate to="/connexion-telephone" replace />} />
+                      <Route path="/paiement/retour" element={<PaymentReturn />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>

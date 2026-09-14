@@ -212,5 +212,14 @@ export async function settleTransaction(
     console.error("[kkiapay] notify-order:", e);
   }
 
+  // Reçu officiel envoyé automatiquement par e-mail au client — non bloquant.
+  try {
+    await admin.functions.invoke("generate-receipt-pdf", {
+      body: { order_id: orderId, email: true },
+    });
+  } catch (e) {
+    console.error("[kkiapay] envoi automatique du reçu:", e);
+  }
+
   return { ok: true, paymentId, orderId, confirmed: Boolean(row?.order_confirmed) };
 }

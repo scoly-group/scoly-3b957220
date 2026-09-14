@@ -613,7 +613,13 @@ const Auth = () => {
             )}
 
             {isLogin && (
-              <div className="flex items-center justify-end">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <a
+                  href="/connexion-telephone"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Se connecter avec mon numéro de téléphone
+                </a>
                 <button
                   type="button"
                   aria-label="Mot de passe oublié"
@@ -621,7 +627,7 @@ const Auth = () => {
                   onClick={async () => {
                     const resetEmail = identifier.includes('@') ? identifier : '';
                     if (!resetEmail) {
-                      toast.error(language === 'fr' ? "Veuillez entrer votre adresse email." : "Please enter your email address.");
+                      window.location.assign('/connexion-telephone?oubli=1');
                       return;
                     }
                     // Rate limit password reset requests
