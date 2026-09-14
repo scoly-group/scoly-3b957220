@@ -668,6 +668,7 @@ const UserManagement = () => {
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.firstName}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.lastName}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.phone}</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.email}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.roles}</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t.date}</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">{t.actions}</th>
