@@ -8,9 +8,15 @@
 
 import { SCOLY_LOGO_BASE64 } from "./logo-base64.ts";
 
-/** URL stable hébergée du logo (Lovable CDN — version optimisée 360px). */
-export const SCOLY_LOGO_URL =
-  "https://scoly-ci-play.lovable.app/logo-scoly-email.png";
+/**
+ * URL stable et publique du logo officiel (domaine de production scoly.ci).
+ * Image source 618×400 px, affichée à 180×117 px dans tous les emails.
+ */
+export const SCOLY_LOGO_URL = "https://scoly.ci/logo-scoly-email.png";
+
+/** Dimensions d'affichage imposées dans les emails (aucun débordement possible). */
+export const SCOLY_LOGO_WIDTH = 180;
+export const SCOLY_LOGO_HEIGHT = 117;
 
 /** Fallback Base64 inline (déclenché par `onerror` si le client mail bloque les images distantes). */
 export { SCOLY_LOGO_BASE64 };
