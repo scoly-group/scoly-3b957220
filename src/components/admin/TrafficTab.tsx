@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Globe,
   Users,
@@ -7,6 +7,8 @@ import {
   Loader2,
   RefreshCw,
   Smartphone,
+  Building2,
+  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,8 +21,8 @@ import {
 } from "@/components/ui/select";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -32,86 +34,114 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Period = "7" | "30" | "90";
 
-interface DailyVisit {
-  date: string;
-  visits: number;
-}
+interface DayRow { day: string; views: number; visitors: number }
+interface CountryRow { country: string; country_code: string | null; views: number; visitors: number }
+interface CityRow { city: string; country: string; views: number }
+interface PageRow { path: string; views: number }
+interface DeviceRow { device: string; views: number }
 
-interface TopEntry {
-  label: string;
-  count: number;
-}
-
-interface TrafficOverview {
-  total_visits: number;
+interface Overview {
+  total_counter: number;
+  page_views: number;
   unique_visitors: number;
   countries_count: number;
-  daily_visits: DailyVisit[];
-  top_pages: TopEntry[];
-  top_countries: TopEntry[];
-  top_devices: TopEntry[];
+  by_day: DayRow[];
+  by_country: CountryRow[];
+  by_city: CityRow[];
+  by_page: PageRow[];
+  by_device: DeviceRow[];
 }
 
-const EMPTY_OVERVIEW: TrafficOverview = {
-  total_visits: 0,
+const EMPTY: Overview = {
+  total_counter: 0,
+  page_views: 0,
   unique_visitors: 0,
   countries_count: 0,
-  daily_visits: [],
-  top_pages: [],
-  top_countries: [],
-  top_devices: [],
+  by_day: [],
+  by_country: [],
+  by_city: [],
+  by_page: [],
+  by_device: [],
 };
 
-// Normalise le JSON renvoyé par la fonction SQL get_traffic_overview,
-// en tolérant des variantes de clés (snake_case ou camelCase).
-const normalizeOverview = (raw: any): TrafficOverview => {
-  if (!raw || typeof raw !== "object") return EMPTY_OVERVIEW;
+/** Drapeau emoji à partir du code ISO à deux lettres. */
+const flagOf = (code?: string | null) => {
+  if (!code || code.length !== 2) return "🏳️";
+  return String.fromCodePoint(
+    ...code.toUpperCase().split("").map((c) => 127397 + c.charCodeAt(0)),
+  );
+};
 
-  const pickArray = (...keys: string[]) => {
-    for (const k of keys) {
-      if (Array.isArray(raw[k])) return raw[k];
-    }
-    return [];
-  };
+const num = (v: unknown) => Number(v ?? 0);
 
-  const mapEntries = (arr: any[], labelKeys: string[], countKeys: string[]): TopEntry[] =>
-    arr.map((item) => {
-      const label =
-        labelKeys.map((k) => item?.[k]).find((v) => v !== undefined && v !== null) ?? "—";
-      const count =
-        countKeys.map((k) => item?.[k]).find((v) => v !== undefined && v !== null) ?? 0;
-      return { label: String(label), count: Number(count) };
-    });
-
-  const dailyRaw = pickArray("daily_visits", "dailyVisits", "by_day", "visits_by_day");
-  const daily: DailyVisit[] = dailyRaw.map((item: any) => ({
-    date: item.date ?? item.day ?? item.created_at ?? "",
-    visits: Number(item.visits ?? item.count ?? item.total ?? 0),
-  }));
-
+const normalize = (raw: any): Overview => {
+  if (!raw || typeof raw !== "object") return EMPTY;
+  const arr = (v: any) => (Array.isArray(v) ? v : []);
   return {
-    total_visits: Number(raw.total_visits ?? raw.totalVisits ?? raw.visits ?? 0),
-    unique_visitors: Number(raw.unique_visitors ?? raw.uniqueVisitors ?? raw.visitors ?? 0),
-    countries_count: Number(raw.countries_count ?? raw.countriesCount ?? raw.countries ?? 0),
-    daily_visits: daily,
-    top_pages: mapEntries(pickArray("top_pages", "topPages"), ["path", "page", "label"], ["count", "visits"]),
-    top_countries: mapEntries(
-      pickArray("top_countries", "topCountries"),
-      ["country_name", "country", "label"],
-      ["count", "visits"]
-    ),
-    top_devices: mapEntries(
-      pickArray("top_devices", "topDevices"),
-      ["device_type", "device", "label"],
-      ["count", "visits"]
-    ),
+    total_counter: num(raw.total_counter),
+    page_views: num(raw.page_views),
+    unique_visitors: num(raw.unique_visitors),
+    countries_count: num(raw.countries_count),
+    by_day: arr(raw.by_day).map((d: any) => ({
+      day: String(d.day ?? ""),
+      views: num(d.views),
+      visitors: num(d.visitors),
+    })),
+    by_country: arr(raw.by_country).map((c: any) => ({
+      country: String(c.country ?? "Inconnu"),
+      country_code: c.country_code ?? null,
+      views: num(c.views),
+      visitors: num(c.visitors),
+    })),
+    by_city: arr(raw.by_city).map((c: any) => ({
+      city: String(c.city ?? "Inconnu"),
+      country: String(c.country ?? ""),
+      views: num(c.views),
+    })),
+    by_page: arr(raw.by_page).map((p: any) => ({ path: String(p.path ?? "/"), views: num(p.views) })),
+    by_device: arr(raw.by_device).map((d: any) => ({
+      device: String(d.device ?? "inconnu"),
+      views: num(d.views),
+    })),
   };
 };
+
+const DEVICE_LABELS: Record<string, string> = {
+  mobile: "Mobile",
+  desktop: "Ordinateur",
+  tablet: "Tablette",
+  inconnu: "Inconnu",
+  unknown: "Inconnu",
+};
+
+const StatCard = ({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: typeof Eye;
+  label: string;
+  value: number;
+  tone: string;
+}) => (
+  <Card className="overflow-hidden border-border/60">
+    <CardContent className="flex items-center gap-4 p-5">
+      <div className={`rounded-xl p-3 ${tone}`}>
+        <Icon size={20} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="text-2xl font-display font-bold">{value.toLocaleString("fr-FR")}</p>
+      </div>
+    </CardContent>
+  </Card>
+);
 
 const TrafficTab = () => {
   const [period, setPeriod] = useState<Period>("30");
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<TrafficOverview>(EMPTY_OVERVIEW);
+  const [data, setData] = useState<Overview>(EMPTY);
 
   const fetchOverview = useCallback(async () => {
     setLoading(true);
@@ -120,9 +150,9 @@ const TrafficTab = () => {
     });
     if (error) {
       console.error("get_traffic_overview error:", error);
-      setData(EMPTY_OVERVIEW);
+      setData(EMPTY);
     } else {
-      setData(normalizeOverview(rpcData));
+      setData(normalize(rpcData));
     }
     setLoading(false);
   }, [period]);
@@ -131,11 +161,18 @@ const TrafficTab = () => {
     fetchOverview();
   }, [fetchOverview]);
 
-  const isEmpty =
-    !loading &&
-    data.total_visits === 0 &&
-    data.daily_visits.length === 0 &&
-    data.top_pages.length === 0;
+  const chartData = useMemo(
+    () =>
+      data.by_day.map((d) => ({
+        ...d,
+        label: d.day
+          ? new Date(d.day).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
+          : "",
+      })),
+    [data.by_day],
+  );
+
+  const maxCountry = Math.max(1, ...data.by_country.map((c) => c.views));
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-6">
@@ -148,7 +185,7 @@ const TrafficTab = () => {
         </div>
         <div className="flex w-full sm:w-auto items-center gap-2">
           <Select value={period} onValueChange={(v: Period) => setPeriod(v)}>
-            <SelectTrigger className="h-10 w-full sm:w-40">
+            <SelectTrigger className="h-10 w-full sm:w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -167,65 +204,55 @@ const TrafficTab = () => {
         <div className="flex items-center justify-center py-24">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : isEmpty ? (
-        <Card>
-          <CardContent className="py-16 text-center text-muted-foreground">
-            <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Aucune donnée de trafic pour cette période.</p>
-          </CardContent>
-        </Card>
       ) : (
         <>
-          {/* Cartes d'indicateurs */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-4 sm:p-6 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                  <Eye size={20} className="text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">Visites</p>
-                  <p className="text-2xl font-bold break-words">{data.total_visits.toLocaleString()}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 sm:p-6 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10 shrink-0">
-                  <Users size={20} className="text-blue-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">Visiteurs uniques</p>
-                  <p className="text-2xl font-bold break-words">{data.unique_visitors.toLocaleString()}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 sm:p-6 flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-emerald-500/10 shrink-0">
-                  <MapPin size={20} className="text-emerald-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">Pays</p>
-                  <p className="text-2xl font-bold break-words">{data.countries_count.toLocaleString()}</p>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <StatCard
+              icon={TrendingUp}
+              label="Visites totales"
+              value={data.total_counter}
+              tone="bg-primary/10 text-primary"
+            />
+            <StatCard
+              icon={Eye}
+              label="Pages vues (période)"
+              value={data.page_views}
+              tone="bg-amber-500/10 text-amber-600"
+            />
+            <StatCard
+              icon={Users}
+              label="Visiteurs uniques"
+              value={data.unique_visitors}
+              tone="bg-blue-500/10 text-blue-600"
+            />
+            <StatCard
+              icon={MapPin}
+              label="Pays"
+              value={data.countries_count}
+              tone="bg-emerald-500/10 text-emerald-600"
+            />
           </div>
 
-          {/* Courbe des visites par jour */}
-          <Card className="min-w-0">
+          <Card className="min-w-0 border-border/60">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Visites par jour</CardTitle>
+              <CardTitle className="text-lg font-semibold">Évolution des visites</CardTitle>
             </CardHeader>
             <CardContent className="min-w-0 overflow-hidden px-2 sm:px-6">
-              {data.daily_visits.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Aucune donnée</p>
+              {chartData.length === 0 ? (
+                <p className="text-center text-muted-foreground py-10 text-sm">
+                  Aucune visite enregistrée sur cette période.
+                </p>
               ) : (
-                <ResponsiveContainer width="100%" height={260} minWidth={0}>
-                  <LineChart data={data.daily_visits}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <ResponsiveContainer width="100%" height={280} minWidth={0}>
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="traffic-views" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.45} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
                     <Tooltip
                       contentStyle={{
@@ -233,74 +260,86 @@ const TrafficTab = () => {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "12px",
                       }}
+                      formatter={(v: number, name) => [
+                        v,
+                        name === "views" ? "Pages vues" : "Visiteurs",
+                      ]}
                     />
-                    <Line
+                    <Area
                       type="monotone"
-                      dataKey="visits"
+                      dataKey="views"
                       stroke="hsl(var(--primary))"
                       strokeWidth={3}
-                      dot={{ fill: "hsl(var(--primary))", r: 3 }}
+                      fill="url(#traffic-views)"
                     />
-                  </LineChart>
+                    <Area
+                      type="monotone"
+                      dataKey="visitors"
+                      stroke="hsl(var(--secondary))"
+                      strokeWidth={2}
+                      fill="transparent"
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               )}
             </CardContent>
           </Card>
 
-          {/* Barres top pays / top pages / appareils */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="min-w-0 border-border/60">
               <CardHeader>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <MapPin size={16} /> Top pays
+                  <Globe size={16} /> Pays des visiteurs
                 </CardTitle>
               </CardHeader>
-              <CardContent className="min-w-0 overflow-hidden">
-                {data.top_countries.length === 0 ? (
+              <CardContent className="min-w-0 space-y-3">
+                {data.by_country.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8 text-sm">Aucune donnée</p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={220} minWidth={0}>
-                    <BarChart data={data.top_countries} layout="vertical" margin={{ left: 8, right: 8 }}>
-                      <XAxis type="number" hide />
-                      <YAxis
-                        dataKey="label"
-                        type="category"
-                        width={90}
-                        fontSize={11}
-                        stroke="hsl(var(--muted-foreground))"
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "12px",
-                        }}
-                      />
-                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  data.by_country.slice(0, 10).map((c, i) => (
+                    <div key={`${c.country}-${i}`} className="space-y-1">
+                      <div className="flex items-center justify-between gap-2 text-sm">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="text-lg leading-none">{flagOf(c.country_code)}</span>
+                          <span className="truncate">{c.country}</span>
+                        </span>
+                        <span className="shrink-0 text-muted-foreground">
+                          {c.views.toLocaleString("fr-FR")} vues · {c.visitors.toLocaleString("fr-FR")} visiteurs
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{ width: `${Math.max(4, (c.views / maxCountry) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))
                 )}
               </CardContent>
             </Card>
 
-            <Card className="min-w-0">
+            <Card className="min-w-0 border-border/60">
               <CardHeader>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Globe size={16} /> Top pages
+                  <Building2 size={16} /> Villes
                 </CardTitle>
               </CardHeader>
-              <CardContent className="min-w-0 overflow-hidden">
-                {data.top_pages.length === 0 ? (
+              <CardContent className="min-w-0">
+                {data.by_city.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8 text-sm">Aucune donnée</p>
                 ) : (
                   <ul className="space-y-2">
-                    {data.top_pages.slice(0, 8).map((p, i) => (
+                    {data.by_city.slice(0, 10).map((c, i) => (
                       <li
-                        key={`${p.label}-${i}`}
-                        className="flex items-center justify-between gap-2 text-sm border-b border-border/60 pb-2 last:border-0"
+                        key={`${c.city}-${i}`}
+                        className="flex items-center justify-between gap-2 border-b border-border/60 pb-2 text-sm last:border-0"
                       >
-                        <span className="truncate min-w-0" title={p.label}>{p.label}</span>
-                        <span className="shrink-0 font-medium text-primary">{p.count}</span>
+                        <span className="truncate min-w-0">
+                          {c.city}
+                          {c.country ? <span className="text-muted-foreground"> · {c.country}</span> : null}
+                        </span>
+                        <span className="shrink-0 font-medium text-primary">{c.views.toLocaleString("fr-FR")}</span>
                       </li>
                     ))}
                   </ul>
@@ -308,29 +347,60 @@ const TrafficTab = () => {
               </CardContent>
             </Card>
 
-            <Card className="min-w-0">
+            <Card className="min-w-0 border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Globe size={16} /> Pages les plus vues
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="min-w-0">
+                {data.by_page.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8 text-sm">Aucune donnée</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {data.by_page.slice(0, 10).map((p, i) => (
+                      <li
+                        key={`${p.path}-${i}`}
+                        className="flex items-center justify-between gap-2 border-b border-border/60 pb-2 text-sm last:border-0"
+                      >
+                        <span className="truncate min-w-0" title={p.path}>{p.path}</span>
+                        <span className="shrink-0 font-medium text-primary">{p.views.toLocaleString("fr-FR")}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="min-w-0 border-border/60">
               <CardHeader>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Smartphone size={16} /> Appareils
                 </CardTitle>
               </CardHeader>
               <CardContent className="min-w-0 overflow-hidden">
-                {data.top_devices.length === 0 ? (
+                {data.by_device.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8 text-sm">Aucune donnée</p>
                 ) : (
                   <ResponsiveContainer width="100%" height={220} minWidth={0}>
-                    <BarChart data={data.top_devices}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <BarChart
+                      data={data.by_device.map((d) => ({
+                        label: DEVICE_LABELS[d.device] ?? d.device,
+                        views: d.views,
+                      }))}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                       <XAxis dataKey="label" fontSize={11} stroke="hsl(var(--muted-foreground))" />
                       <YAxis allowDecimals={false} fontSize={11} stroke="hsl(var(--muted-foreground))" />
                       <Tooltip
+                        cursor={{ fill: "hsl(var(--muted))", opacity: 0.4 }}
                         contentStyle={{
                           backgroundColor: "hsl(var(--card))",
                           border: "1px solid hsl(var(--border))",
                           borderRadius: "12px",
                         }}
                       />
-                      <Bar dataKey="count" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="views" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
